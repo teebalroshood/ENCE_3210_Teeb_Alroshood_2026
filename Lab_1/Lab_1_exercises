@@ -1,0 +1,426 @@
+Lab 1 – Question 1: Twice the Square of an Integer
+
+The objective of this experiment is to write a C program that calculates twice the square of integers between 0 and 511. The program uses a user-defined function to perform the calculation and stores the results in an array.
+
+
+#include <stdio.h>          // Enables input/output functions such as printf
+
+#define MAX 512             // Defines the range of numbers from 0 to 511
+
+/*
+   Function to calculate twice the square of a given integer
+*/
+int twiceSquare(int n)
+{
+    return 2 * n * n;       // Returns 2 multiplied by the square of n
+}
+
+int main()
+{
+    int result[MAX];        // Array to store results
+
+    /*
+      Compute twice the square of each number
+      from 0 to 511 and store it in the array
+    */
+    for (int i = 0; i < MAX; i++)
+    {
+        result[i] = twiceSquare(i);
+    }
+
+    /*
+      Display the first 10 results
+      for verification purposes
+    */
+    for (int i = 0; i < 10; i++)
+    {
+        printf("2 * (%d^2) = %d\n", i, result[i]);
+    }
+
+    return 0;               // Program termination
+}
+
+
+
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Question 2: Cosine of Integer Angles
+The objective of this experiment is to calculate the cosine of integer angles between 0 and 360 degrees. The results are stored in an array after converting each angle from degrees to radians.
+
+
+#include <stdio.h>      // Allows output using printf
+#include <math.h>       // Provides the cos() function and M_PI constant
+
+#define MAX_DEG 361     // Covers angles from 0 to 360 degrees
+
+int main()
+{
+    double cos_values[MAX_DEG];   // Array to store cosine results
+    double radians;               // Variable to hold angle in radians
+
+    /*
+      Convert degrees to radians and
+      calculate cosine for each angle
+    */
+    for (int degree = 0; degree <= 360; degree++)
+    {
+        radians = degree * M_PI / 180.0;   // Convert degrees to radians
+        cos_values[degree] = cos(radians); // Store cosine value
+    }
+
+    /*
+      Display the first few cosine values
+      for verification purposes
+    */
+    for (int degree = 0; degree <= 10; degree++)
+    {
+        printf("cos(%d°) = %.6f\n", degree, cos_values[degree]);
+    }
+
+    return 0;   // End of program
+}
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Question 3: Finding the Second Maximum Value
+The objective of this experiment is to find the second maximum value in an integer array containing 50 elements. The array is declared as a global variable, and the second maximum value is written to the memory location immediately following the array.
+#include <stdio.h>
+
+#define SIZE 50     // Defines the array size
+
+/* Global array with 50 integer elements */
+int arr[SIZE] = {
+    12, 45, 78, 23, 56, 89, 34, 90, 67, 21,
+    43, 65, 87, 32, 54, 76, 98, 11, 29, 40,
+    52, 63, 74, 85, 96, 17, 28, 39, 50, 61,
+    72, 83, 94, 15, 26, 37, 48, 59, 70, 81,
+    92, 13, 24, 35, 46, 57, 68, 79, 88, 99
+};
+
+int main()
+{
+    int max, secondMax;     // Variables to store maximum values
+
+    max = secondMax = arr[0];   // Initialize both values
+
+    /*
+      Loop through the array to find
+      the maximum and second maximum values
+    */
+    for (int i = 1; i < SIZE; i++)
+    {
+        if (arr[i] > max)
+        {
+            secondMax = max;    // Update second maximum
+            max = arr[i];       // Update maximum
+        }
+        else if (arr[i] > secondMax && arr[i] != max)
+        {
+            secondMax = arr[i]; // Update second maximum
+        }
+    }
+
+    /*
+      Store the second maximum value
+      in memory just after the array
+    */
+    *(arr + SIZE) = secondMax;
+
+    /* Display the results */
+    printf("Maximum value       : %d\n", max);
+    printf("Second maximum value: %d\n", secondMax);
+    printf("Stored at arr[50]   : %d\n", arr[50]);
+
+    return 0;   // End of program
+}
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Question 4: Detecting R, G, and B Characters and LED Control
+The objective of this experiment is to detect the characters ‘R’, ‘G’, and ‘B’ in a character array. When each letter is detected, the corresponding red, green, or blue LED is turned on. The program also counts the number of occurrences of each character.
+
+#include <stdio.h>
+
+#define SIZE 20     // Size of the character array
+
+/* Functions to simulate LED behavior */
+void redLED(int state)   { printf("RED LED %s\n", state ? "ON" : "OFF"); }
+void greenLED(int state) { printf("GREEN LED %s\n", state ? "ON" : "OFF"); }
+void blueLED(int state)  { printf("BLUE LED %s\n", state ? "ON" : "OFF"); }
+
+int main()
+{
+    /* Character array to be searched */
+    char array[SIZE] = {
+        'R','A','G','B','R','C','G','B','R','D',
+        'B','G','E','R','F','G','H','B','R','G'
+    };
+
+    int rCount = 0, gCount = 0, bCount = 0;   // Counters for each letter
+
+    /*
+      Scan the array and count
+      occurrences of R, G, and B
+    */
+    for (int i = 0; i < SIZE; i++)
+    {
+        if (array[i] == 'R')
+            rCount++;
+        else if (array[i] == 'G')
+            gCount++;
+        else if (array[i] == 'B')
+            bCount++;
+    }
+
+    /*
+      Turn LEDs ON if their
+      corresponding letter is found
+    */
+    redLED(rCount > 0);
+    greenLED(gCount > 0);
+    blueLED(bCount > 0);
+
+    /* Display the number of occurrences */
+    printf("\nOccurrences:\n");
+    printf("R = %d\n", rCount);
+    printf("G = %d\n", gCount);
+    printf("B = %d\n", bCount);
+
+    return 0;   // End of program
+}
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Question 5: Pattern Detection in an Array
+The objective of this experiment is to detect a specific pattern of three integers within a data array. When the pattern is detected, the green LED is turned on. If the pattern is not detected, the red LED is turned on. The program also counts the number of occurrences of the pattern.
+
+
+#include <stdio.h>
+
+#define DATA_SIZE 20        // Size of the data array
+#define PATTERN_SIZE 3      // Size of the pattern array
+
+/* Functions to simulate LED behavior */
+void greenLED(int state) { printf("GREEN LED %s\n", state ? "ON" : "OFF"); }
+void redLED(int state)   { printf("RED LED %s\n", state ? "ON" : "OFF"); }
+
+int main()
+{
+    /* Data array to be searched */
+    int data[DATA_SIZE] = {
+        1, 2, 3, 4, 2, 3, 4, 5, 2, 3,
+        4, 6, 7, 2, 3, 4, 8, 9, 2, 3
+    };
+
+    /* Pattern to be detected */
+    int pattern[PATTERN_SIZE] = {2, 3, 4};
+
+    int count = 0;      // Counts number of pattern matches
+
+    /*
+      Search for the pattern in the data array
+      using nested loops
+    */
+    for (int i = 0; i <= DATA_SIZE - PATTERN_SIZE; i++)
+    {
+        int match = 1;  // Assume a match initially
+
+        for (int j = 0; j < PATTERN_SIZE; j++)
+        {
+            if (data[i + j] != pattern[j])
+            {
+                match = 0;  // Pattern does not match
+                break;
+            }
+        }
+
+        if (match)
+            count++;   // Increment count if pattern is found
+    }
+
+    /*
+      Turn on LEDs based on whether
+      the pattern was detected
+    */
+    if (count > 0)
+    {
+        greenLED(1);
+        redLED(0);
+    }
+    else
+    {
+        greenLED(0);
+        redLED(1);
+    }
+
+    /* Display the number of pattern occurrences */
+    printf("\nPattern occurrences: %d\n", count);
+
+    return 0;   // End of program
+}
+
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Question 6: LED Sequencing Using Button Control
+The objective of this experiment is to turn red, green, and blue LEDs on and off in a specific sequence. The LED sequence starts when a button is pressed and continues looping until the button is pressed again to stop the sequence.
+
+
+#include <stdio.h>
+#include <unistd.h>   // Provides sleep() for timing delays
+
+/* Function to simulate LED control */
+void LEDs(int r, int g, int b)
+{
+    printf("LEDs Status: ");
+    if (r) printf("R ");
+    if (g) printf("G ");
+    if (b) printf("B ");
+    if (!r && !g && !b) printf("OFF");
+    printf("\n");
+}
+
+int main()
+{
+    int button;    // Simulated button input
+
+    /* Start the LED sequence */
+    printf("Press button to START the LED sequence (enter 1): ");
+    scanf("%d", &button);
+
+    if (button != 1)
+        return 0;
+
+    printf("\nLED sequence started...\n");
+    printf("Press button again (enter 1) to STOP\n\n");
+
+    /*
+      Continuously cycle through the LED sequence
+      until the button is pressed again
+    */
+    while (1)
+    {
+        LEDs(1,0,0);  // R
+        sleep(1);
+
+        LEDs(1,1,0);  // RG
+        sleep(1);
+
+        LEDs(1,1,1);  // RGB
+        sleep(1);
+
+        LEDs(0,1,1);  // GB
+        sleep(1);
+
+        LEDs(0,0,1);  // B
+        sleep(1);
+
+        LEDs(1,0,1);  // RB
+        sleep(1);
+
+        /* Check if the button is pressed again */
+        printf("\nPress 1 to stop sequence, 0 to continue: ");
+        scanf("%d", &button);
+
+        if (button == 1)
+        {
+            LEDs(0,0,0);   // Turn off all LEDs
+            printf("\nLED sequence stopped.\n");
+            break;
+        }
+    }
+
+    return 0;   // End of program
+}
+
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Question 7: Array-Based Calculator with Button-Controlled Operations
+The objective of this experiment is to design a simple calculator that performs arithmetic operations on two integer arrays and stores the results in a third array. The arithmetic operation is selected using a button press counter, and LEDs are used to indicate the selected operation and completion of the calculation.
+
+#include <stdio.h>
+
+#define SIZE 10    // Size of each array
+
+/* Functions to simulate LED behavior */
+void redLED(int state)   { printf("RED LED %s\n", state ? "ON" : "OFF"); }
+void greenLED(int state) { printf("GREEN LED %s\n", state ? "ON" : "OFF"); }
+void blueLED(int state)  { printf("BLUE LED %s\n", state ? "ON" : "OFF"); }
+
+/* Function to control all LEDs at once */
+void allLEDs(int state)
+{
+    redLED(state);
+    greenLED(state);
+    blueLED(state);
+}
+
+int main()
+{
+    /* Input arrays and result array */
+    int arr1[SIZE]   = {1,2,3,4,5,6,7,8,9,10};
+    int arr2[SIZE]   = {10,9,8,7,6,5,4,3,2,1};
+    int result[SIZE] = {0};
+
+    int counter = 0;     // Counts button 1 presses
+    int operation = 0;  // 1 = Add, 2 = Subtract, 3 = Multiply
+
+    /* -------- Button 1 pressed -------- */
+    printf("Press Button 1 (1–3 times): ");
+    scanf("%d", &counter);
+
+    switch (counter)
+    {
+        case 1:
+            operation = 1;
+            redLED(1);
+            greenLED(0);
+            blueLED(0);
+            break;
+
+        case 2:
+            operation = 2;
+            redLED(0);
+            greenLED(1);
+            blueLED(0);
+            break;
+
+        case 3:
+            operation = 3;
+            redLED(0);
+            greenLED(0);
+            blueLED(1);
+            break;
+
+        default:
+            printf("Invalid button presses!\n");
+            return 0;
+    }
+
+    /* -------- Button 2 pressed -------- */
+    printf("\nButton 2 pressed – Performing operation...\n");
+
+    /* Turn off all LEDs during calculation */
+    allLEDs(0);
+
+    /*
+      Apply the selected operation
+      to each element of the arrays
+    */
+    for (int i = 0; i < SIZE; i++)
+    {
+        if (operation == 1)
+            result[i] = arr1[i] + arr2[i];
+        else if (operation == 2)
+            result[i] = arr1[i] - arr2[i];
+        else if (operation == 3)
+            result[i] = arr1[i] * arr2[i];
+    }
+
+    /* Turn on all LEDs after completion */
+    allLEDs(1);
+
+    /* Display the results */
+    printf("\nResult Array:\n");
+    for (int i = 0; i < SIZE; i++)
+        printf("result[%d] = %d\n", i, result[i]);
+
+    return 0;   // End of program
+}
+
+
