@@ -1,3 +1,4 @@
+// Question 2 
 #include <Arduino.h>                 // Include Arduino core functions
 
 const uint8_t BTN_PIN = 2;           // Button connected to pin 2 (interrupt pin)
