@@ -1,0 +1,88 @@
+//Question 4
+
+#include <Arduino.h>                 
+// This line includes the main Arduino library so we can use
+// built-in functions like pinMode(), digitalWrite(), micros(), etc.
+
+//  Button pin definition 
+
+const uint8_t BTN1_PIN = 2;          
+// This constant defines that Button 1 is connected to digital pin 2.
+// Pin 2 is used because it supports external interrupts (INT0).
+
+//  Array size definition 
+const int SIZE = 10;                 
+// This constant sets the size of the arrays x[] and y[] to 10 elements.
+
+//  Global arrays 
+volatile int x[SIZE] = {1,2,3,4,5,6,7,8,9,10};  
+// This is the global input array x[].
+// It is filled at the beginning of the program with example values.
+// In a real application, this array could be filled by an ADC or
+// another hardware peripheral.
+// The keyword 'volatile' is used because this array is accessed
+// inside an interrupt service routine (ISR).
+
+volatile int y[SIZE] = {0};          
+// This is the global output array y[].
+// It will store the result of the filtering equation.
+// It is initialized to zero so it starts with known values.
+// It is also marked volatile because it is modified inside the ISR.
+
+//  Debounce variables 
+volatile unsigned long last_us = 0;  
+// This variable stores the time of the last interrupt in microseconds.
+// It is used to prevent multiple interrupts from a single button press.
+
+const unsigned long DEBOUNCE_US = 30000; 
+// This constant defines the debounce time as 30 milliseconds.
+// Any interrupts that occur faster than this are ignored.
+
+//  Interrupt Service Routine 
+// This function automatically runs when Button 1 is pressed.
+void ISR_button1() {
+
+  unsigned long now = micros();      
+  // Get the current time in microseconds since the Arduino started.
+
+  // Check if enough time has passed since the last interrupt
+  // This prevents button bouncing from triggering multiple calculations.
+  if (now - last_us > DEBOUNCE_US) {
+
+    // Calculate the first element separately because x[-1] does not exist.
+    // We assume x[-1] = 0 for this case.
+    y[0] = 2 * x[0];                 
+    // This applies the equation y[n] = 2*x[n] - x[n-1] for n = 0.
+
+    // Loop through the rest of the array elements.
+    for (int n = 1; n < SIZE; n++) {
+      y[n] = 2 * x[n] - x[n - 1];    
+      // This line applies the filtering equation:
+      // y[n] = 2*x[n] - x[n-1]
+      // for every index from 1 to 9.
+    }
+
+    last_us = now;                  
+    // Save the current time so we can debounce the next interrupt.
+  }
+}
+
+//  Setup function 
+// This function runs once when the Arduino is powered on or reset.
+void setup() {
+
+  pinMode(BTN1_PIN, INPUT_PULLUP);   
+  // Configure Button 1 as an input using the internal pull-up resistor.
+  // This means the pin reads HIGH normally and LOW when the button is pressed.
+
+  // In this lab, no Serial output or LEDs are required.
+  // The main focus is demonstrating interrupt-based array processing.
+}
+
+// Main loop 
+// This function runs repeatedly, but is intentionally left empty.
+void loop() {
+
+  // Nothing is needed here because all processing happens inside the ISR.
+  // Each time the interrupt occurs, the filter equation is applied.
+}
