@@ -1,0 +1,141 @@
+#include <util/atomic.h>  // For ATOMIC_BLOCK
+
+// ---------------- Pin Assignments ----------------
+const int RED_LED_PIN   = 5;
+const int GREEN_LED_PIN = 4;
+
+// Button pins on Kitchen Timer 1.0 board
+const int BUTTON1_PIN = 2;
+const int BUTTON2_PIN = 3;
+
+// ---------------- Timer Constants ----------------
+// Timer1 (16 MHz clock, prescaler 1024) for ~1 Hz:
+// (16,000,000 / (1024 * 1)) - 1 = 15624
+#define TIMER1_OCR_1HZ 15624
+
+// Timer2 for ~100 Hz base tick with prescaler 1024:
+// (16,000,000 / (1024 * 100)) - 1 ≈ 155
+#define TIMER2_OCR_100HZ 155
+
+// Divide 100 Hz down to 10 Hz for task 2
+#define TIMER2_DIVIDER 10
+
+// Shared counter updated in ISR
+volatile unsigned long gSeconds = 0;
+
+// ---------------- Task 1: 1 Hz Green LED + Seconds Counter ----------------
+static inline void taskOneISR() {
+  digitalWrite(GREEN_LED_PIN, !digitalRead(GREEN_LED_PIN));
+  gSeconds++;
+}
+
+static void timerOneSetup() {
+  noInterrupts();
+
+  // Reset Timer1 registers/counter
+  TCCR1A = 0;
+  TCCR1B = 0;
+  TCNT1  = 0;
+
+  // Compare match at 1 Hz
+  OCR1A = TIMER1_OCR_1HZ;
+
+  // CTC mode (Clear Timer on Compare)
+  TCCR1B |= (1 << WGM12);
+
+  // Prescaler = 1024
+  TCCR1B |= (1 << CS12) | (1 << CS10);
+
+  // Enable compare match interrupt A
+  TIMSK1 |= (1 << OCIE1A);
+
+  interrupts();
+}
+
+ISR(TIMER1_COMPA_vect) {
+  taskOneISR();
+}
+
+// ---------------- Task 2: 10 Hz Red LED Based on Buttons ----------------
+static inline void taskTwoISR() {
+  // Buttons are INPUT_PULLUP: pressed = LOW
+  bool button1Pressed = (digitalRead(BUTTON1_PIN) == LOW);
+  bool button2Pressed = (digitalRead(BUTTON2_PIN) == LOW);
+
+  digitalWrite(RED_LED_PIN, (button1Pressed || button2Pressed) ? HIGH : LOW);
+}
+
+static void timerTwoSetup() {
+  noInterrupts();
+
+  // Reset Timer2 registers/counter
+  TCCR2A = 0;
+  TCCR2B = 0;
+  TCNT2  = 0;
+
+  // Compare match for ~100 Hz
+  OCR2A = TIMER2_OCR_100HZ;
+
+  // CTC mode
+  TCCR2A |= (1 << WGM21);
+
+  // Prescaler = 1024
+  TCCR2B |= (1 << CS22) | (1 << CS21) | (1 << CS20);
+
+  // Enable compare match interrupt A
+  TIMSK2 |= (1 << OCIE2A);
+
+  interrupts();
+}
+
+ISR(TIMER2_COMPA_vect) {
+  static unsigned char div = 0;  // persists across interrupts
+
+  // Count 100 Hz ticks and run the task every 10 ticks (~10 Hz)
+  div++;
+  if (div >= TIMER2_DIVIDER) {
+    div = 0;
+    taskTwoISR();
+  }
+}
+
+// ---------------- Arduino Setup / Loop ----------------
+void setup() {
+  pinMode(GREEN_LED_PIN, OUTPUT);
+  pinMode(RED_LED_PIN, OUTPUT);
+
+  pinMode(BUTTON1_PIN, INPUT_PULLUP);
+  pinMode(BUTTON2_PIN, INPUT_PULLUP);
+
+  digitalWrite(GREEN_LED_PIN, LOW);
+  digitalWrite(RED_LED_PIN, LOW);
+
+  Serial.begin(115200);
+  Serial.println("=== Kitchen Timer Multi-Task Program ===");
+  Serial.println("Green LED: blinks at ~1 Hz");
+  Serial.println("Red LED: ON when either button is pressed");
+  Serial.println("========================================");
+
+  timerOneSetup();
+  timerTwoSetup();
+}
+
+void loop() {
+  static unsigned long lastPrint = 0;
+  unsigned long now;
+
+  // Atomic read of gSeconds (updated in ISR)
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
+    now = gSeconds;
+  }
+
+  // Print status every 3 seconds
+  if ((now - lastPrint) >= 3) {
+    lastPrint = now;
+    Serial.print("Foreground task: ");
+    Serial.print(now);
+    Serial.println(" seconds elapsed");
+  }
+
+  // No delay(); timing is interrupt-driven
+}
